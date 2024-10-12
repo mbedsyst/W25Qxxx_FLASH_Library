@@ -33,13 +33,13 @@ void W25Q_Init(void)
 
 uint32_t W25Q_ReadID(void)
 {
-    uint8_t dummyByte = 0xFF;
-    uint8_t id[3];
-    SPI2_SelectSlave();
-    SPI2_TransmitReceiveByte(READ_ID);
-    SPI2_TransmitReceive_MultiByte(&dummyByte, id, 3);
-    SPI2_DeselectSlave();
-    return ((id[0] << 16) | (id[1] << 8) | (id[2]));
+    	uint8_t dummyByte = 0xFF;
+    	uint8_t id[3];
+    	SPI2_SelectSlave();
+    	SPI2_TransmitReceiveByte(READ_ID);
+    	SPI2_TransmitReceive_MultiByte(&dummyByte, id, 3);
+    	SPI2_DeselectSlave();
+    	return ((id[0] << 16) | (id[1] << 8) | (id[2]));
 }
 
 void W25Q_ReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint16_t length)
@@ -79,7 +79,6 @@ void W25Q_FastReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint
 
 void W25Q_WritePage(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data)
 {
-
 	uint32_t memAddress = (startPage * 256) + offset;
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
