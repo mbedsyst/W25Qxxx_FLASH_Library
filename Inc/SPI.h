@@ -10,5 +10,4 @@ void SPI2_DeselectSlave(void);
 uint8_t SPI2_TransmitReceiveByte(uint8_t data);
 void SPI2_TransmitReceive_MultiByte(uint8_t *txData, uint8_t *rxData, uint16_t size);
 
-
 #endif
