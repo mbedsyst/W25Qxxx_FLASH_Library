@@ -102,7 +102,7 @@ void W25Q_FastReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint
 	SPI2_DeselectSlave();
 }
 
-void W25Q_WritePage(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data)
+static void W25Q_WritePage(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data)
 {
 	uint32_t memAddress = (startPage * 256) + offset;
 	W25Q_WriteEnable();
@@ -116,6 +116,36 @@ void W25Q_WritePage(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t 
 	W25Q_WriteDisable();
 	delay_ms(5);
 }
+
+void W25Q_WriteData(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data)
+{
+    uint32_t bytesToWrite;
+    uint32_t remainingBytes = size;
+    uint32_t currentPage = startPage;
+    uint16_t currentOffset = offset;
+    uint8_t *currentData = data;
+
+    // While there's data left to write
+    while (remainingBytes > 0)
+    {
+        // Calculate how many bytes can be written to the current page
+        bytesToWrite = 256 - currentOffset;
+        if (remainingBytes < bytesToWrite)
+        {
+            bytesToWrite = remainingBytes;
+        }
+
+        // Call W25Q_WritePage() function
+        W25Q_WritePage(currentPage, currentOffset, bytesToWrite, currentData);
+
+        // Update the remaining data, current data pointer, and Page Number
+        remainingBytes -= bytesToWrite;
+        currentData += bytesToWrite;
+        currentPage++;
+        currentOffset = 0;
+    }
+}
+
 
 void W25Q_EraseSector(uint8_t block, uint8_t sector)
 {

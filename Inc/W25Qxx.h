@@ -43,7 +43,7 @@ void W25Q_ReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint16_t
 void W25Q_FastReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint16_t length);
 
 // Write Functions
-void W25Q_WritePage(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data);
+void W25Q_WriteData(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t *data);
 
 // Erase Functions
 void W25Q_EraseSector(uint8_t block, uint8_t sector);
