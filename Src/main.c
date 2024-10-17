@@ -5,7 +5,7 @@
 
 int main()
 {
-	uint8_t buf[256] ="The W25Q64FV (64M-bit) Serial Flash memory provides a storage solution for systems with limited space, pins and power. The 25Q series offers flexibility and performance well beyond ordinary Serial Flash devices. They are ideal for code shadowing to RAM .!!";
+	uint8_t buf[256];
 	W25Q_Init();
 	LED_Init();
 	UART2_Init();

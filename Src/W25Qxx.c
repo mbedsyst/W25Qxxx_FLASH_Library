@@ -31,6 +31,20 @@ void W25Q_Init(void)
 	W25Q_Reset();
 }
 
+void W25Q_PowerDown(void)
+{
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(POWER_DOWN);
+	SPI2_DeselectSlave();
+}
+
+void W25Q_PowerUp(void)
+{
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(POWER_UP);
+	SPI2_DeselectSlave();
+}
+
 uint32_t W25Q_ReadID(void)
 {
     	uint8_t dummyByte = 0xFF;
@@ -40,6 +54,17 @@ uint32_t W25Q_ReadID(void)
     	SPI2_TransmitReceive_MultiByte(&dummyByte, id, 3);
     	SPI2_DeselectSlave();
     	return ((id[0] << 16) | (id[1] << 8) | (id[2]));
+}
+
+uint32_t W25Q_ReadUID(void)
+{
+	uint8_t dummyByte = 0xFF;
+	uint8_t id[4];
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(READ_UID);
+	SPI2_TransmitReceive_MultiByte(&dummyByte, id, 4);
+	SPI2_DeselectSlave();
+	return ((id[0] << 24) | (id[1] << 16) | (id[2] << 8) | (id[3]));
 }
 
 void W25Q_ReadData(uint32_t startPage, uint8_t offset, uint8_t *buffer, uint16_t length)
@@ -110,7 +135,7 @@ void W25Q_Erase32kBlock(uint8_t block, uint8_t half)
 	uint32_t memAddress = (block * 65536) + (half * 32768);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
-	SPI2_TransmitReceiveByte(ERASE_32kBLOCK);
+	SPI2_TransmitReceiveByte(ERASE_32KBLOCK);
 	SPI2_TransmitReceiveByte((memAddress >> 16) & 0xFF);
 	SPI2_TransmitReceiveByte((memAddress >> 8) & 0xFF);
 	SPI2_TransmitReceiveByte(memAddress & 0xFF);
@@ -123,7 +148,7 @@ void W25Q_Erase64kBlock(uint8_t block)
 	uint32_t memAddress = (block * 65536);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
-	SPI2_TransmitReceiveByte(ERASE_64kBLOCK);
+	SPI2_TransmitReceiveByte(ERASE_64KBLOCK);
 	SPI2_TransmitReceiveByte((memAddress >> 16) & 0xFF);
 	SPI2_TransmitReceiveByte((memAddress >> 8) & 0xFF);
 	SPI2_TransmitReceiveByte(memAddress & 0xFF);
