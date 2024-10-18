@@ -146,10 +146,9 @@ void W25Q_WriteData(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t 
     }
 }
 
-
-void W25Q_EraseSector(uint8_t block, uint8_t sector)
+void W25Q_EraseSector(uint8_t blockNumber, uint8_t sectorNumber)
 {
-	uint32_t memAddress = (block * 65536) + (sector * 4096);
+	uint32_t memAddress = (blockNumber * 65536) + (sector * 4096);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
 	SPI2_TransmitReceiveByte(ERASE_SECTOR);
@@ -160,9 +159,9 @@ void W25Q_EraseSector(uint8_t block, uint8_t sector)
 	delay_ms(500);
 }
 
-void W25Q_Erase32kBlock(uint8_t block, uint8_t half)
+void W25Q_Erase32kBlock(uint8_t blockNumber, uint8_t half)
 {
-	uint32_t memAddress = (block * 65536) + (half * 32768);
+	uint32_t memAddress = (blockNumber * 65536) + (half * 32768);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
 	SPI2_TransmitReceiveByte(ERASE_32KBLOCK);
@@ -173,9 +172,9 @@ void W25Q_Erase32kBlock(uint8_t block, uint8_t half)
 	delay_ms(1700);
 }
 
-void W25Q_Erase64kBlock(uint8_t block)
+void W25Q_Erase64kBlock(uint8_t blockNumber)
 {
-	uint32_t memAddress = (block * 65536);
+	uint32_t memAddress = (blockNumber * 65536);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
 	SPI2_TransmitReceiveByte(ERASE_64KBLOCK);
@@ -193,4 +192,110 @@ void W25Q_EraseChip(void)
 	SPI2_TransmitReceiveByte(ERASE_CHIP);
 	SPI2_DeselectSlave();
 	delay_ms(100100);
+}
+
+uint8_t W25Q_ReadStatusRegister1(void)
+{
+	uint8_t statusReg;
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	statusReg = SPI2_TransmitReceiveByte(READ_STATUS_R1);
+	SPI2_DeselectSlave();
+	return statusReg;
+}
+
+uint8_t W25Q_ReadStatusRegister2(void)
+{
+	uint8_t statusReg;
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	statusReg = SPI2_TransmitReceiveByte(READ_STATUS_R2);
+	SPI2_DeselectSlave();
+	return statusReg;
+}
+
+void W25Q_WriteStatusRegister(uint8_t statusReg1, uint8_t statusReg2)
+{
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(WRITE_STATUS_REG);
+	SPI2_TransmitReceiveByte(statusReg1);
+	SPI2_TransmitReceiveByte(statusReg2);
+	SPI2_DeselectSlave();
+}
+void W25Q_WriteSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint8_t len)
+{
+	uint32_t memAddress;
+
+	switch(reg)
+	{
+		case '1':	memAddress = SECURITY_REG_1; break;
+		case '2':	memAddress = SECURITY_REG_2; break;
+		case '3':	memAddress = SECURITY_REG_3; break;
+		default : 	break;
+	}
+
+	memAddress = memAddress + offset;
+
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(WRITE_SECURITY_REG);
+	SPI2_TransmitReceiveByte((memAddress >> 16) & 0xFF);
+	SPI2_TransmitReceiveByte((memAddress >> 8) & 0xFF);
+	SPI2_TransmitReceiveByte(memAddress & 0xFF);
+	for (uint8_t i = 0; i < len; i++)
+	{
+		// Send data and discard dummy data
+		SPI2_TransmitReceiveByte(data[i]);
+	}
+	SPI2_DeselectSlave();
+}
+
+void W25Q_ReadSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint8_t len)
+{
+	uint32_t memAddress;
+
+	switch(reg)
+	{
+		case '1':	memAddress = SECURITY_REG_1; break;
+		case '2':	memAddress = SECURITY_REG_2; break;
+		case '3':	memAddress = SECURITY_REG_3; break;
+		default : 	break;
+	}
+
+	memAddress = memAddress + offset;
+
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(READ_SECURITY_REG);
+	SPI2_TransmitReceiveByte((memAddress >> 16) & 0xFF);
+	SPI2_TransmitReceiveByte((memAddress >> 8) & 0xFF);
+	SPI2_TransmitReceiveByte(memAddress & 0xFF);
+	for (uint8_t i = 0; i < len; i++)
+	{
+		// Send dummy byte and receive data
+		data[i] = SPI2_TransmitReceiveByte(0xFF);
+	}
+	SPI2_DeselectSlave();
+}
+
+void W25Q_EraseSecurityRegister(uint8_t reg)
+{
+	uint32_t memAddress;
+
+	switch(reg)
+	{
+		case '1':	memAddress = SECURITY_REG_1; break;
+		case '2':	memAddress = SECURITY_REG_2; break;
+		case '3':	memAddress = SECURITY_REG_3; break;
+		default : 	break;
+	}
+
+	W25Q_WriteEnable();
+	SPI2_SelectSlave();
+	SPI2_TransmitReceiveByte(ERASE_SECURITY_REG);
+	SPI2_TransmitReceiveByte((memAddress >> 16) & 0xFF);
+	SPI2_TransmitReceiveByte((memAddress >> 8) & 0xFF);
+	SPI2_TransmitReceiveByte(memAddress & 0xFF);
+	SPI2_DeselectSlave();
 }
